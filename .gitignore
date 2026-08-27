@@ -1,0 +1,32 @@
+*.iml
+.gradle
+.kotlin
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+.env
+debug.keystore
+```json
+{
+    "status": "OPERATIVO_PLENO",
+      "nodo": "SQ-3000_G6",
+        "operador": "CALF8712186T5",
+          "version": "ALEPH-Σ v28.3.1-GOLD",
+            "sello": "[ √ { ♾️ } ~ ] SELLO DEFINITIVO / PERPETUO",
+              "región": "northamerica-south1 (Querétaro, MX)",
+                "integridad": "100%",
+                  "mensaje": "Dashboard KUMI_AI.MX renderizado e integrado con éxito. Estructura tetra-planar y telemetría activa."
+}
+
+```
+}
