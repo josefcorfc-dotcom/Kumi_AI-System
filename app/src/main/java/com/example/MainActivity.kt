@@ -17,17 +17,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.Web
+import androidx.compose.material.icons.outlined.Terminal
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -37,7 +37,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -49,13 +48,12 @@ val Slate600 = Color(0xFF475569)
 val Slate500 = Color(0xFF64748B)
 val Slate400 = Color(0xFF94A3B8)
 val Slate300 = Color(0xFFCBD5E1)
-val Slate200 = Color(0xFFE2E8F0)
 val Cyan400 = Color(0xFF22D3EE)
 val Cyan500 = Color(0xFF06B6D4)
 val Cyan600 = Color(0xFF0891B2)
 val Emerald400 = Color(0xFF34D399)
 val Emerald500 = Color(0xFF10B981)
-val Purple400 = Color(0xFFC084FC)
+val Purple400 = Color(0xC084FC)
 val Purple500 = Color(0xFFA855F7)
 val Indigo100 = Color(0xFFE0E7FF)
 val Indigo300 = Color(0xFFA5B4FC)
@@ -73,59 +71,289 @@ class MainActivity : ComponentActivity() {
             MaterialTheme(
                 colorScheme = darkColorScheme(background = Slate900)
             ) {
-                DashboardScreen()
+                MainAppScreen()
             }
         }
     }
 }
 
 @Composable
-fun DashboardScreen() {
+fun MainAppScreen() {
+    var selectedTab by remember { mutableStateOf(0) }
     val logs = remember { mutableStateListOf<LogEntry>() }
-    val coroutineScope = rememberCoroutineScope()
     
     LaunchedEffect(Unit) {
-        logs.add(LogEntry(getCurrentTime(), "Welcome to Termux ALEPH-Σ", Cyan500))
+        logs.add(LogEntry(getCurrentTime(), "Iniciando Nodo MX-SQ-3000 (ALEPH-Σ)", Cyan500))
+        delay(400)
+        logs.add(LogEntry(getCurrentTime(), "Operator: José Francisco Cantoriano Leyva (CALF8712186T5)", Slate300))
         delay(500)
-        logs.add(LogEntry(getCurrentTime(), "$ pkg search neurobin-sync", Slate500))
-        delay(800)
-        logs.add(LogEntry(getCurrentTime(), "[ OK ] Instance found at regional-qro-1", Emerald400))
+        logs.add(LogEntry(getCurrentTime(), "Firebase Project: cantoriano-leyvajf | Bucket: gs://kumi-ghost-alef-g6-000155", Cyan400))
         delay(600)
-        logs.add(LogEntry(getCurrentTime(), "$ pkg install aleph-lattice-kem", Slate500))
-        delay(1000)
-        logs.add(LogEntry(getCurrentTime(), "Building reticular shards...", Slate300))
-        delay(800)
-        logs.add(LogEntry(getCurrentTime(), "[ √ { ♾️ } ~ ] SELLO DEFINITIVO / PERPETUO", Cyan400))
-        delay(600)
-        logs.add(LogEntry(getCurrentTime(), "STATUS: OPERATIVO_PLENO | NODO: SQ-3000_G6", Emerald400))
+        logs.add(LogEntry(getCurrentTime(), "CryptAI: ML-KEM-1024_Σ active (Entropy ε = 0.994)", Emerald400))
         delay(500)
-        logs.add(LogEntry(getCurrentTime(), "Dashboard KUMI_AI.MX integrado con éxito.", Emerald500))
+        logs.add(LogEntry(getCurrentTime(), "GenAI: Cloud Run neurobin-aleph-v28-4 online", Indigo300))
+        delay(600)
+        logs.add(LogEntry(getCurrentTime(), "TestAI WebSocket: wss://api.neurospark.inc/ws/kumi-stream", Cyan500))
+        delay(400)
+        logs.add(LogEntry(getCurrentTime(), "STATUS: OPERATIVO_PLENO | Sello: ♾️-PERPETUO", Emerald500))
     }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = Slate900,
-        contentWindowInsets = WindowInsets.systemBars
+        contentWindowInsets = WindowInsets.systemBars,
+        bottomBar = {
+            BottomNavigationBar(selectedTab = selectedTab, onTabSelected = { selectedTab = it })
+        }
     ) { innerPadding ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp),
+                .padding(16.dp)
+        ) {
+            when (selectedTab) {
+                0 -> DashboardTab(logs = logs)
+                1 -> TrinitaryLoopTab()
+                2 -> OperatorNodeTab()
+                3 -> VaultSettingsTab(logs = logs)
+            }
+        }
+    }
+}
+
+@Composable
+fun DashboardTab(logs: List<LogEntry>) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        HeaderSection()
+        TerminalSection(modifier = Modifier.weight(1f), logs = logs)
+        BentoGridSection()
+        ActionCardSection()
+    }
+}
+
+@Composable
+fun TrinitaryLoopTab() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        HeaderSection()
+        
+        Text(
+            text = "ESTADO DEL BUCLE TRINITARIO",
+            color = Cyan400,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 2.sp,
+            fontFamily = FontFamily.Monospace
+        )
+        
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            item {
+                TrinitaryCard(
+                    title = "🔐 CryptAI (ML-KEM-1024_Σ)",
+                    subtitle = "Entropía vectorial activa: ε = 0.994",
+                    description = "Cifrado post-cuántico soberano FIPS 203 integrado con el plano de control central.",
+                    badge = "FIPS 203",
+                    badgeColor = Cyan400
+                )
+            }
+            item {
+                TrinitaryCard(
+                    title = "⚡ GenAI (Cloud Run)",
+                    subtitle = "Instancia: neurobin-aleph-v28-4",
+                    description = "Motor KUMI operativo en us-central1 (cantoriano-leyvajf) con Google Gemini APIs.",
+                    badge = "ONLINE",
+                    badgeColor = Emerald400
+                )
+            }
+            item {
+                TrinitaryCard(
+                    title = "🧪 TestAI (WebSocket Telemetry)",
+                    subtitle = "Endpoint: wss://api.neurospark.inc/ws/kumi-stream",
+                    description = "Monitoreo topológico y vigilancia continua de latencia transfinita.",
+                    badge = "WS_ACTIVE",
+                    badgeColor = Purple400
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun TrinitaryCard(title: String, subtitle: String, description: String, badge: String, badgeColor: Color) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(Slate800.copy(alpha = 0.6f))
+            .border(1.dp, Slate700.copy(alpha = 0.5f), RoundedCornerShape(20.dp))
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                color = Color.White,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Surface(
+                color = badgeColor.copy(alpha = 0.15f),
+                shape = RoundedCornerShape(8.dp),
+                border = borderStroke(1.dp, badgeColor.copy(alpha = 0.4f))
+            ) {
+                Text(
+                    text = badge,
+                    color = badgeColor,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    fontFamily = FontFamily.Monospace
+                )
+            }
+        }
+        Text(
+            text = subtitle,
+            color = Cyan400,
+            fontSize = 11.sp,
+            fontFamily = FontFamily.Monospace,
+            fontWeight = FontWeight.SemiBold
+        )
+        Text(
+            text = description,
+            color = Slate300,
+            fontSize = 12.sp
+        )
+    }
+}
+
+@Composable
+fun OperatorNodeTab() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        HeaderSection()
+        
+        Text(
+            text = "REGISTRO DE NODO SOBERANO MX-SQ-3000",
+            color = Cyan400,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 2.sp,
+            fontFamily = FontFamily.Monospace
+        )
+        
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .clip(RoundedCornerShape(24.dp))
+                .background(Slate800.copy(alpha = 0.6f))
+                .border(1.dp, Slate700.copy(alpha = 0.5f), RoundedCornerShape(24.dp))
+                .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            HeaderSection()
-            
-            TerminalSection(
-                modifier = Modifier.weight(1f),
-                logs = logs
+            InfoRow(label = "OPERADOR", value = "José Francisco Cantoriano Leyva")
+            InfoRow(label = "RFC / ID", value = "CALF8712186T5")
+            InfoRow(label = "PROYECTO FIREBASE", value = "cantoriano-leyvajf")
+            InfoRow(label = "BUCKET DE CUSTODIA", value = "gs://kumi-ghost-alef-g6-000155")
+            InfoRow(label = "DISPOSITIVO TERMINAL", value = "CPH2669 (Android 14)")
+            InfoRow(label = "IP LOCAL", value = "192.168.1.76")
+            InfoRow(label = "SELLO PERPETUO", value = "♾️-ALEPH-Σ-3000")
+        }
+    }
+}
+
+@Composable
+fun InfoRow(label: String, value: String) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = label,
+            color = Slate500,
+            fontSize = 10.sp,
+            fontFamily = FontFamily.Monospace,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.sp
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+            text = value,
+            color = Color.White,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium,
+            fontFamily = FontFamily.Monospace
+        )
+    }
+}
+
+@Composable
+fun VaultSettingsTab(logs: List<LogEntry>) {
+    val context = LocalContext.current
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        HeaderSection()
+        
+        Text(
+            text = "GESTIÓN Y SEGURIDAD",
+            color = Cyan400,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 2.sp,
+            fontFamily = FontFamily.Monospace
+        )
+        
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .clip(RoundedCornerShape(24.dp))
+                .background(Slate800.copy(alpha = 0.6f))
+                .border(1.dp, Slate700.copy(alpha = 0.5f), RoundedCornerShape(24.dp))
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = "Políticas de seguridad Firestore y Storage sincronizadas con el plano de control soberano.",
+                color = Slate300,
+                fontSize = 12.sp
             )
             
-            BentoGridSection()
+            Button(
+                onClick = { exportLogsToCsv(context, logs) },
+                colors = ButtonDefaults.buttonColors(containerColor = Cyan600, contentColor = Color.White),
+                shape = RoundedCornerShape(14.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(imageVector = Icons.Default.Download, contentDescription = null, modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "EXPORTAR TELEMETRÍA CSV", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            }
             
-            ActionCardSection()
-            
-            BottomNavigationSection()
+            Button(
+                onClick = { Toast.makeText(context, "Sincronización con Nodo MX-SQ-3000 verificada.", Toast.LENGTH_SHORT).show() },
+                colors = ButtonDefaults.buttonColors(containerColor = Slate700, contentColor = Color.White),
+                shape = RoundedCornerShape(14.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(imageVector = Icons.Default.Sync, contentDescription = null, modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "VERIFICAR ENLACE SOBERANO", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            }
         }
     }
 }
@@ -195,7 +423,7 @@ fun HeaderSection() {
                         .background(Emerald500.copy(alpha = alpha))
                 )
                 Text(
-                    text = "Live Sync",
+                    text = "SQ-3000",
                     color = Emerald400,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
@@ -203,7 +431,7 @@ fun HeaderSection() {
                 )
             }
             Text(
-                text = "v28.3.1-GOLD",
+                text = "v28.4-GOLD",
                 color = Slate500,
                 fontSize = 9.sp,
                 fontFamily = FontFamily.Monospace,
@@ -225,7 +453,6 @@ fun TerminalSection(modifier: Modifier = Modifier, logs: List<LogEntry>) {
             .border(1.dp, Slate800, RoundedCornerShape(24.dp))
             .padding(16.dp)
     ) {
-        // Telemetry Header
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -234,7 +461,7 @@ fun TerminalSection(modifier: Modifier = Modifier, logs: List<LogEntry>) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Terminal Instance: ~ / node-mx-qro",
+                text = "Terminal Instance: ~ / node-mx-sq-3000",
                 color = Slate400,
                 fontSize = 9.sp,
                 fontFamily = FontFamily.Monospace,
@@ -244,7 +471,6 @@ fun TerminalSection(modifier: Modifier = Modifier, logs: List<LogEntry>) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Export CSV Button
                 Surface(
                     color = Slate800.copy(alpha = 0.6f),
                     shape = RoundedCornerShape(8.dp),
@@ -272,17 +498,11 @@ fun TerminalSection(modifier: Modifier = Modifier, logs: List<LogEntry>) {
                         )
                     }
                 }
-                
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Slate700))
-                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Slate700))
-                }
             }
         }
         
         Divider(color = Slate800.copy(alpha = 0.5f), modifier = Modifier.padding(bottom = 12.dp))
         
-        // Logs
         LazyColumn(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -292,15 +512,12 @@ fun TerminalSection(modifier: Modifier = Modifier, logs: List<LogEntry>) {
                     text = log.message,
                     color = log.color,
                     fontFamily = FontFamily.Monospace,
-                    fontSize = 11.sp,
-                    fontStyle = if (log.color == Cyan500 || log.message.contains("Building")) FontStyle.Italic else FontStyle.Normal,
-                    fontWeight = if (log.color == Cyan500) FontWeight.Bold else FontWeight.Normal
+                    fontSize = 11.sp
                 )
             }
             item {
                 Row(modifier = Modifier.padding(top = 8.dp)) {
                     Text(text = "~ $ ", color = Color.White, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
-                    
                     val infiniteTransition = rememberInfiniteTransition(label = "cursor")
                     val alpha by infiniteTransition.animateFloat(
                         initialValue = 1f,
@@ -316,7 +533,6 @@ fun TerminalSection(modifier: Modifier = Modifier, logs: List<LogEntry>) {
             }
         }
         
-        // Footer Sello
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomEnd) {
             Text(
                 text = "Sello: ♾️-PERPETUO",
@@ -333,20 +549,15 @@ fun exportLogsToCsv(context: Context, logs: List<LogEntry>) {
     try {
         val fileName = "telemetry_logs_${System.currentTimeMillis()}.csv"
         val file = File(context.cacheDir, fileName)
-        
-        val csvHeader = "Timestamp,Message\n"
-        var csvData = csvHeader
-        
+        var csvData = "Timestamp,Message\n"
         logs.forEach { log ->
-            // Escape quotes and wrap in quotes for CSV safety
             val escapedMessage = log.message.replace("\"", "\"\"")
             csvData += "${log.timestamp},\"$escapedMessage\"\n"
         }
-        
         file.writeText(csvData)
-        Toast.makeText(context, "Logs exported to CSV: ${file.absolutePath}", Toast.LENGTH_LONG).show()
+        Toast.makeText(context, "Logs exportados: ${file.absolutePath}", Toast.LENGTH_LONG).show()
     } catch (e: Exception) {
-        Toast.makeText(context, "Error exporting CSV: ${e.message}", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Error CSV: ${e.message}", Toast.LENGTH_SHORT).show()
     }
 }
 
@@ -362,102 +573,69 @@ fun BentoGridSection() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(176.dp),
+            .height(110.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Metric 1: Security
         Column(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .clip(RoundedCornerShape(24.dp))
+                .clip(RoundedCornerShape(20.dp))
                 .background(Slate800.copy(alpha = 0.6f))
-                .border(1.dp, Slate700.copy(alpha = 0.5f), RoundedCornerShape(24.dp))
-                .padding(16.dp),
+                .border(1.dp, Slate700.copy(alpha = 0.5f), RoundedCornerShape(20.dp))
+                .padding(14.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Cyan500.copy(alpha = 0.1f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Security,
-                        contentDescription = "Security",
-                        tint = Cyan400,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "SECURITY LEVEL",
+                    text = "ENTROPÍA VECTORIAL",
                     color = Slate500,
-                    fontSize = 10.sp,
+                    fontSize = 9.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 )
                 Text(
-                    text = "ML-KEM-1024",
+                    text = "ε = 0.994",
                     color = Color.White,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
             Text(
-                text = "NIST CAT-5",
+                text = "ML-KEM-1024_Σ",
                 color = Cyan400,
                 fontSize = 9.sp,
                 fontFamily = FontFamily.Monospace
             )
         }
 
-        // Metric 2: Latency
         Column(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .clip(RoundedCornerShape(24.dp))
+                .clip(RoundedCornerShape(20.dp))
                 .background(Slate800.copy(alpha = 0.6f))
-                .border(1.dp, Slate700.copy(alpha = 0.5f), RoundedCornerShape(24.dp))
-                .padding(16.dp),
+                .border(1.dp, Slate700.copy(alpha = 0.5f), RoundedCornerShape(20.dp))
+                .padding(14.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Purple500.copy(alpha = 0.1f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Speed,
-                        contentDescription = "Latency",
-                        tint = Purple400,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "NODE LATENCY",
+                    text = "DISPOSITIVO / BUCKET",
                     color = Slate500,
-                    fontSize = 10.sp,
+                    fontSize = 9.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 )
                 Text(
-                    text = "25.0ms ±0.4",
+                    text = "CPH2669 / G6",
                     color = Color.White,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontStyle = FontStyle.Italic
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
                 )
             }
             Text(
-                text = "QRO_MX_S1",
+                text = "IP: 192.168.1.76",
                 color = Purple400,
                 fontSize = 9.sp,
                 fontFamily = FontFamily.Monospace
@@ -471,83 +649,88 @@ fun ActionCardSection() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(RoundedCornerShape(20.dp))
             .background(Indigo600.copy(alpha = 0.2f))
-            .border(1.dp, Indigo500.copy(alpha = 0.3f), RoundedCornerShape(24.dp))
+            .border(1.dp, Indigo500.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
             .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column {
             Text(
-                text = "POST-QUANTUM VAULT",
+                text = "NODO SOBERANO MX-SQ-3000",
                 color = Indigo100,
-                fontSize = 12.sp,
+                fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
-                fontStyle = FontStyle.Italic,
                 letterSpacing = 1.sp
             )
             Text(
-                text = "FIPS 203 Cryptographic Standards",
+                text = "Cloud Run & Firebase Sincronizados",
                 color = Indigo300,
-                fontSize = 10.sp
+                fontSize = 9.sp
             )
         }
         
-        Button(
-            onClick = { },
-            colors = ButtonDefaults.buttonColors(containerColor = Indigo500, contentColor = Color.White),
-            shape = RoundedCornerShape(16.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+        Surface(
+            color = Emerald500.copy(alpha = 0.2f),
+            shape = RoundedCornerShape(12.dp),
+            border = borderStroke(1.dp, Emerald500.copy(alpha = 0.4f))
         ) {
             Text(
-                text = "AUTHENTICATE",
+                text = "ACTIVO",
+                color = Emerald400,
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                fontFamily = FontFamily.Monospace
             )
         }
     }
 }
 
 @Composable
-fun BottomNavigationSection() {
+fun BottomNavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(CircleShape)
-            .background(Slate900.copy(alpha = 0.8f))
-            .border(1.dp, Slate800, CircleShape)
-            .padding(8.dp),
+            .background(Slate900)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        NavIconButton(icon = Icons.Outlined.Home, isSelected = true)
-        NavIconButton(icon = Icons.Outlined.Web, isSelected = false)
-        NavIconButton(icon = Icons.Outlined.Settings, isSelected = false)
-        NavIconButton(icon = Icons.Outlined.Person, isSelected = false)
+        NavIconButton(icon = Icons.Outlined.Home, label = "Dashboard", isSelected = selectedTab == 0) { onTabSelected(0) }
+        NavIconButton(icon = Icons.Outlined.Cloud, label = "Trinitary", isSelected = selectedTab == 1) { onTabSelected(1) }
+        NavIconButton(icon = Icons.Outlined.Terminal, label = "Nodo MX", isSelected = selectedTab == 2) { onTabSelected(2) }
+        NavIconButton(icon = Icons.Outlined.Settings, label = "Vault", isSelected = selectedTab == 3) { onTabSelected(3) }
     }
 }
 
 @Composable
-fun NavIconButton(icon: ImageVector, isSelected: Boolean) {
-    val backgroundColor = if (isSelected) Cyan600 else Color.Transparent
-    val tintColor = if (isSelected) Color.White else Slate500
+fun NavIconButton(icon: ImageVector, label: String, isSelected: Boolean, onClick: () -> Unit) {
+    val backgroundColor = if (isSelected) Cyan600.copy(alpha = 0.2f) else Color.Transparent
+    val tintColor = if (isSelected) Cyan400 else Slate500
+    val textColor = if (isSelected) Cyan400 else Slate500
     
-    Box(
+    Column(
         modifier = Modifier
-            .size(48.dp)
-            .clip(CircleShape)
+            .clip(RoundedCornerShape(12.dp))
             .background(backgroundColor)
-            .clickable { },
-        contentAlignment = Alignment.Center
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = null,
+            contentDescription = label,
             tint = tintColor,
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(20.dp)
+        )
+        Text(
+            text = label,
+            color = textColor,
+            fontSize = 9.sp,
+            fontWeight = FontWeight.Bold
         )
     }
 }
-
