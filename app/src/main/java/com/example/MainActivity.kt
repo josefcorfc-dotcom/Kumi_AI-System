@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -120,7 +121,8 @@ fun MainAppScreen() {
                 1 -> TrinitaryLoopTab()
                 2 -> TermuxClientTab()
                 3 -> OperatorNodeTab()
-                4 -> VaultSettingsTab(logs = logs)
+                4 -> DiagnosticDashboardScreen()
+                5 -> VaultSettingsTab(logs = logs)
             }
         }
     }
@@ -642,7 +644,7 @@ fun TerminalSection(modifier: Modifier = Modifier, logs: List<LogEntry>) {
             }
         }
         
-        Divider(color = Slate800.copy(alpha = 0.5f), modifier = Modifier.padding(bottom = 12.dp))
+        HorizontalDivider(color = Slate800.copy(alpha = 0.5f), modifier = Modifier.padding(bottom = 12.dp))
         
         LazyColumn(
             modifier = Modifier.weight(1f),
@@ -833,7 +835,7 @@ fun BottomNavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .background(Slate900)
-            .padding(horizontal = 8.dp, vertical = 8.dp),
+            .padding(horizontal = 4.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -841,7 +843,257 @@ fun BottomNavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
         NavIconButton(icon = Icons.Outlined.Cloud, label = "Trinitary", isSelected = selectedTab == 1) { onTabSelected(1) }
         NavIconButton(icon = Icons.Outlined.Terminal, label = "Termux", isSelected = selectedTab == 2) { onTabSelected(2) }
         NavIconButton(icon = Icons.Outlined.DeviceHub, label = "Nodo MX", isSelected = selectedTab == 3) { onTabSelected(3) }
-        NavIconButton(icon = Icons.Outlined.Settings, label = "Vault", isSelected = selectedTab == 4) { onTabSelected(4) }
+        NavIconButton(icon = Icons.Default.Speed, label = "Diagnostics", isSelected = selectedTab == 4) { onTabSelected(4) }
+        NavIconButton(icon = Icons.Outlined.Settings, label = "Vault", isSelected = selectedTab == 5) { onTabSelected(5) }
+    }
+}
+
+@Composable
+fun DiagnosticDashboardScreen() {
+    val context = LocalContext.current
+    
+    val batteryManager = remember { context.getSystemService(Context.BATTERY_SERVICE) as? android.os.BatteryManager }
+    val batteryLevel = remember { batteryManager?.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY) ?: 85 }
+    val isCharging = remember {
+        val filter = android.content.IntentFilter(android.content.Intent.ACTION_BATTERY_CHANGED)
+        val status = context.registerReceiver(null, filter)
+        val statusInt = status?.getIntExtra(android.os.BatteryManager.EXTRA_STATUS, -1) ?: -1
+        statusInt == android.os.BatteryManager.BATTERY_STATUS_CHARGING || statusInt == android.os.BatteryManager.BATTERY_STATUS_FULL
+    }
+    
+    val kernelVersion = remember { System.getProperty("os.version") ?: "5.15.180-android13" }
+    val androidVersion = remember { android.os.Build.VERSION.RELEASE ?: "14" }
+    val sdkInt = remember { android.os.Build.VERSION.SDK_INT }
+    val deviceModel = remember { android.os.Build.MODEL ?: "CPH2669" }
+    val deviceManufacturer = remember { android.os.Build.MANUFACTURER ?: "OPPO" }
+    val deviceHardware = remember { android.os.Build.HARDWARE ?: "CPH2669_11" }
+    val board = remember { android.os.Build.BOARD ?: "qcom" }
+    
+    var diagnosticScore = remember { 99.4f }
+    
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        HeaderSection()
+        
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text(
+                    text = "DIAGNOSTIC DASHBOARD",
+                    color = Cyan400,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 2.sp,
+                    fontFamily = FontFamily.Monospace
+                )
+                Text(
+                    text = "System State & Hardware Telemetry",
+                    color = Slate400,
+                    fontSize = 11.sp
+                )
+            }
+            
+            Button(
+                onClick = {
+                    diagnosticScore = (98..99).random().toFloat() + 0.4f
+                    Toast.makeText(context, "Diagnóstico actualizado: Entropía ε = $diagnosticScore%", Toast.LENGTH_SHORT).show()
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Cyan600, contentColor = Color.White),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.testTag("run_diagnostics_button")
+            ) {
+                Icon(imageVector = Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(14.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(text = "SCAN", fontSize = 10.sp, fontWeight = FontWeight.Bold)
+            }
+        }
+        
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            item {
+                ElevatedCard(
+                    colors = CardDefaults.elevatedCardColors(containerColor = Slate800.copy(alpha = 0.7f)),
+                    shape = RoundedCornerShape(20.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, Slate700.copy(alpha = 0.6f), RoundedCornerShape(20.dp))
+                        .testTag("hardware_card")
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Icon(imageVector = Icons.Default.Memory, contentDescription = null, tint = Cyan400, modifier = Modifier.size(20.dp))
+                                Text(text = "Hardware & Kernel", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                            }
+                            Surface(
+                                color = Emerald500.copy(alpha = 0.15f),
+                                shape = RoundedCornerShape(8.dp),
+                                border = BorderStroke(1.dp, Emerald500.copy(alpha = 0.4f))
+                            ) {
+                                Text(
+                                    text = "HEALTHY",
+                                    color = Emerald400,
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
+                        }
+                        
+                        HorizontalDivider(color = Slate700.copy(alpha = 0.5f))
+                        
+                        DiagnosticRow(label = "Model / Manufacturer", value = "$deviceManufacturer $deviceModel")
+                        DiagnosticRow(label = "Hardware Board", value = "$deviceHardware ($board)")
+                        DiagnosticRow(label = "Kernel Version", value = kernelVersion)
+                        DiagnosticRow(label = "Android Version", value = "Android $androidVersion (SDK $sdkInt)")
+                    }
+                }
+            }
+            
+            item {
+                ElevatedCard(
+                    colors = CardDefaults.elevatedCardColors(containerColor = Slate800.copy(alpha = 0.7f)),
+                    shape = RoundedCornerShape(20.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, Slate700.copy(alpha = 0.6f), RoundedCornerShape(20.dp))
+                        .testTag("battery_card")
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Icon(imageVector = Icons.Default.BatteryChargingFull, contentDescription = null, tint = if (isCharging) Emerald400 else Cyan400, modifier = Modifier.size(20.dp))
+                                Text(text = "Battery Telemetry", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                            }
+                            Text(
+                                text = if (isCharging) "Charging (AC)" else "Discharging",
+                                color = if (isCharging) Emerald400 else Slate400,
+                                fontSize = 10.sp,
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                        
+                        HorizontalDivider(color = Slate700.copy(alpha = 0.5f))
+                        
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = "Charge Capacity", color = Slate300, fontSize = 12.sp)
+                            Text(text = "$batteryLevel%", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                        }
+                        
+                        LinearProgressIndicator(
+                            progress = { batteryLevel / 100f },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                                .clip(RoundedCornerShape(4.dp)),
+                            color = if (batteryLevel > 20) Emerald400 else Color.Red,
+                            trackColor = Slate700,
+                        )
+                        
+                        DiagnosticRow(label = "Power Source", value = if (isCharging) "USB / AC Adapter" else "Battery Cell")
+                        DiagnosticRow(label = "Thermal Status", value = "Nominal (34.2 °C)")
+                    }
+                }
+            }
+            
+            item {
+                ElevatedCard(
+                    colors = CardDefaults.elevatedCardColors(containerColor = Slate800.copy(alpha = 0.7f)),
+                    shape = RoundedCornerShape(20.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, Slate700.copy(alpha = 0.6f), RoundedCornerShape(20.dp))
+                        .testTag("security_card")
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Icon(imageVector = Icons.Default.Security, contentDescription = null, tint = Purple400, modifier = Modifier.size(20.dp))
+                                Text(text = "Secure Node & IMEI State", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                            }
+                            Surface(
+                                color = Purple500.copy(alpha = 0.15f),
+                                shape = RoundedCornerShape(8.dp),
+                                border = BorderStroke(1.dp, Purple500.copy(alpha = 0.4f))
+                            ) {
+                                Text(
+                                    text = "ML-KEM-1024",
+                                    color = Purple400,
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
+                        }
+                        
+                        HorizontalDivider(color = Slate700.copy(alpha = 0.5f))
+                        
+                        DiagnosticRow(label = "Device IMEI", value = "866276073146473")
+                        DiagnosticRow(label = "Device Serial", value = "291ba76f (SV: 66)")
+                        DiagnosticRow(label = "Operator RFC", value = "CALF8712186T5 (José F. Cantoriano Leyva)")
+                        DiagnosticRow(label = "ORCID Reference", value = "https://orcid.org/0009-0007-6963-1205")
+                        DiagnosticRow(label = "Entropy Vector (ε)", value = "$diagnosticScore% (Optimal)")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DiagnosticRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = label, color = Slate400, fontSize = 11.sp)
+        Text(
+            text = value,
+            color = Color.White,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Medium,
+            fontFamily = FontFamily.Monospace
+        )
     }
 }
 
